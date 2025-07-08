@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>UMCS OVERVIEW - Modern</title>
     <style>
         body {
             margin: 0;
@@ -533,24 +533,30 @@ function selectMarker(buildingId, markerElement) {
 
 // Clear marker selection
 function clearMarkerSelection() {
-    if (selectedMarker && selectedMarker.element) {
+    console.log('Clearing marker selection');
+    
+    if (selectedMarkerInfo && selectedMarkerInfo.element) {  // <- Fixed: use selectedMarkerInfo
         // Remove selection visual feedback
-        selectedMarker.element.style.border = '';
-        selectedMarker.element.style.boxShadow = '';
+        selectedMarkerInfo.element.style.outline = '';        // <- Fixed: use selectedMarkerInfo
+        selectedMarkerInfo.element.style.outlineOffset = '';  // <- Fixed: use selectedMarkerInfo
     }
     
-    selectedMarker = null;
+    selectedMarkerInfo = null;  // <- Fixed: use selectedMarkerInfo
     
     // Disable edit and delete buttons
-    document.getElementById('editBtn').disabled = true;
-    document.getElementById('deleteBtn').disabled = true;
+    const editBtn = document.getElementById('editBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    
+    if (editBtn) editBtn.disabled = true;
+    if (deleteBtn) deleteBtn.disabled = true;
     
     // Reset coordinates display
     const coordsDisplay = document.getElementById('coordinatesDisplay');
-    coordsDisplay.textContent = 'Selected: X: 0, Y: 0';
+    if (coordsDisplay) {
+        coordsDisplay.textContent = 'Selected: X: 0, Y: 0';
+    }
     
-    // Reset mode indicator
-    updateModeIndicator('ready', 'Ready - Click on marker to select');
+    console.log('Selection cleared');
 }
 
         function toggleBuildingManagerMode() {
@@ -1053,12 +1059,15 @@ function addEditFormStyles() {
 
 // Enhanced startDeleteMode function (triggered by delete button)
 function startDeleteMode() {
-    if (!selectedMarker) {
+    console.log('Delete button clicked');
+    console.log('selectedMarkerInfo:', selectedMarkerInfo);
+    
+    if (!selectedMarkerInfo) {  // <- Fixed: use selectedMarkerInfo instead of selectedMarker
         alert('Please select a marker first!');
         return;
     }
     
-    const buildingId = selectedMarker.id;
+    const buildingId = selectedMarkerInfo.id;  // <- Fixed: use selectedMarkerInfo
     
     if (confirm(`Are you sure you want to delete building ${buildingId}?`)) {
         deleteSelectedMarker();
@@ -1067,13 +1076,13 @@ function startDeleteMode() {
 
 // Delete the currently selected marker
 function deleteSelectedMarker() {
-    if (!selectedMarker) {
+    if (!selectedMarkerInfo) {  // <- Fixed: use selectedMarkerInfo
         alert('No marker selected for deletion!');
         return;
     }
     
-    const buildingId = selectedMarker.id;
-    const markerElement = selectedMarker.element;
+    const buildingId = selectedMarkerInfo.id;     // <- Fixed: use selectedMarkerInfo
+    const markerElement = selectedMarkerInfo.element;  // <- Fixed: use selectedMarkerInfo
     
     // Remove from data array
     deleteMarkerFromData(buildingId);
