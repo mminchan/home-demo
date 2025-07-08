@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMCS OVERVIEW - Modern</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #2c5f2d;
+            color: white;
+        }
+        
+        .header {
+            background: #1a3a1a;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #ffd530;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .header-line {
+            height: 2px;
+            background: #ffd530;
+            margin: 10px 0;
+        }
+        
+        .building-manager-mode-btn {
+            position: absolute;
+            top: 140px;
+            right: 50px;
+            width: 120px;
+            height: 20px;
+            background: #ffd530;
+            color: black;
+            border: 1px solid #e6c02d;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 9px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        
+        .building-manager-mode-btn:hover {
+            background: #e6c02d;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+        
+        .building-manager-mode-btn.active {
+            background: #4a7c59;
+            color: white;
+            border-color: #5a8c69;
+        }
+        
+        #map {
+            position: relative;
+            width: 100vw;
+            height: calc(100vh - 120px);
+            background: url('bg/bg.jpg');
+            background-size: cover;
+        }
+        
+        .search-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 25px;
+            padding: 10px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .search-bar input {
+            border: none;
+            outline: none;
+            padding: 5px;
+            width: 300px;
+            font-size: 14px;
+        }
+        
+        .search-btn {
+            background: #ffd530;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .dynamic-building-marker {
+            position: absolute;
+            width: 25px;
+            height: 20px;
+            z-index: 10;
+            transform: scale(0.5);
+            opacity: 0.75;
+            transition: all 0.3s ease;
+        }
+        
+        .dynamic-building-link {
+            background: #050400 !important;
+            width: 15px !important;
+            height: 15px !important;
+            border-radius: 50% !important;
+            border: 2px solid white !important;
+            display: block;
+            text-decoration: none;
+            transition: none;
+        }
+        
+        .dynamic-building-marker:hover {
+            transform: scale(1) !important;
+            opacity: 1;
+            z-index: 10000;
+        }
+        
+        .dynamic-building-info {
+            position: absolute;
+            top: -30px;
+            left: -25px;
+            background: #666;
+            color: white;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .dynamic-building-marker:hover .dynamic-building-info {
+            opacity: 1;
+        }
+        
+        .crud-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 350px;
+            height: 300px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .crud-panel.active {
+            display: block;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .crud-panel-header {
+            background: #333;
+            color: #ffd530;
+            padding: 12px 15px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .crud-panel-header h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .crud-close-btn {
+            background: #7c4a4a;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .crud-close-btn:hover {
+            background: #8c5a5a;
+        }
+        
+        .crud-panel-content {
+            padding: 15px;
+            height: calc(100% - 45px);
+            overflow-y: auto;
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+        
+        .mode-indicator {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #333;
+            background: #ccc;
+        }
+        
+        .mode-indicator.create {
+            background: #4a7c59;
+            color: white;
+        }
+        
+        .mode-indicator.edit {
+            background: #ffd530;
+            color: black;
+        }
+        
+        .mode-indicator.delete {
+            background: #7c4a4a;
+            color: white;
+        }
+        
+        .crud-controls {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .crud-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 50px;
+        }
+        
+        .crud-btn.create { 
+            background: #4a7c59; 
+            color: white; 
+        }
+        
+        .crud-btn.read { 
+            background: #2196f3; 
+            color: white; 
+        }
+        
+        .crud-btn.update { 
+            background: #ffd530; 
+            color: black; 
+        }
+        
+        .crud-btn.delete { 
+            background: #7c4a4a; 
+            color: white; 
+        }
+        
+        .crud-btn.save { 
+            background: #555; 
+            color: white; 
+        }
+        
+        .crud-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+        
+        .crud-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .coordinates-display {
+            background: #333;
+            color: #ffd530;
+            padding: 6px 8px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+        }
+        
+        #position-display {
+            position: absolute;
+            bottom: -22px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #ffd530;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Home UI Demo</h1>
+        <div class="header-line"></div>
+    </div>
+    
+    <button class="building-manager-mode-btn" id="buildingManagerModeBtn" onclick="toggleBuildingManagerMode()">
+        BuildingManager
+    </button>
+    
+    <div id="map" onclick="enhancedBrowserPoint(event)">
+        <div class="search-bar">
+            <input type="search" placeholder="Search buildings..." pattern=".*\S.*">
+            <button class="search-btn">Search</button>
+        </div>
+        
+        <!-- Dynamic building markers -->
+        <div class="dynamic-building-marker" style="left: 310px; top: 50px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00001</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 475px; top: 110px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00002</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 1423px; top: 200px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00003</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 805px; top: 540px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00004</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 1340px; top: 430px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00005</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 1429px; top: 300px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00006</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 355px; top: 430px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00007</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 697px; top: 115px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00008</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 445px; top: 270px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00009</div>
+        </div>
+        
+        <div class="dynamic-building-marker" style="left: 1100px; top: 753px;">
+            <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+            <div class="dynamic-building-info">B00010</div>
+        </div>
+        
+        <div id="position-display">POSITION : ( X : 0, Y : 0)</div>
+    </div>
+    
+    <!-- CRUD Management Panel -->
+    <div class="crud-panel" id="crudPanel">
+        <div class="crud-panel-header">
+            <h3>🏢 Building Manager</h3>
+            <button class="crud-close-btn" onclick="closeBuildingManagerMode()">×</button>
+        </div>
+        
+        <div class="crud-panel-content">
+            <div class="mode-indicator" id="modeIndicator">Ready</div>
+            
+            <div class="crud-controls">
+                <button class="crud-btn create" onclick="startCreateMode()">➕ Create</button>
+                <button class="crud-btn update" onclick="startEditMode()" id="editBtn" disabled>✏️ Update</button>
+                <button class="crud-btn delete" onclick="startDeleteMode()" id="deleteBtn" disabled>🗑️ Delete</button>
+                <button class="crud-btn save" onclick="saveData()" id="saveBtn">💾 Save</button>
+            </div>
+            
+            <div class="coordinates-display" id="coordinatesDisplay">
+                Selected: X: 0, Y: 0
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let buildingMarkers = [
+    { id: 'B00001', x: 310, y: 50, name: 'B00001' },
+    { id: 'B00002', x: 475, y: 110, name: 'B00002' },
+    { id: 'B00003', x: 1423, y: 200, name: 'B00003' },
+    { id: 'B00004', x: 805, y: 540, name: 'B00004' },
+    { id: 'B00005', x: 1340, y: 430, name: 'B00005' },
+    { id: 'B00006', x: 1429, y: 300, name: 'B00006' },
+    { id: 'B00007', x: 355, y: 430, name: 'B00007' },
+    { id: 'B00008', x: 697, y: 115, name: 'B00008' },
+    { id: 'B00009', x: 445, y: 270, name: 'B00009' },
+    { id: 'B00010', x: 1100, y: 753, name: 'B00010' }
+];
+
+let selectedMarker = null;
+let selectedMarkerInfo = null;
+let createModeCoordinates = null;
+let nextBuildingNumber = 11; // Start from B00011
+
+        let buildingManagerMode = {
+            isActive: false,
+            crudState: {
+                mode: 'ready',
+                selectedMarker: null,
+                selectedCoordinates: null,
+                isModified: false
+            }
+        };
+
+        // Initialize marker click events for selection
+function initializeMarkerClickEvents() {
+    console.log('=== Initializing marker click events ===');
+    
+    // Get all existing markers
+    const markers = document.querySelectorAll('.dynamic-building-marker');
+    console.log('Found markers:', markers.length);
+    
+    markers.forEach((marker, index) => {
+        // Get building ID from the info div
+        const infoDiv = marker.querySelector('.dynamic-building-info');
+        const buildingId = infoDiv ? infoDiv.textContent.trim() : `Unknown-${index}`;
+        
+        console.log(`Setting up marker ${index}:`, buildingId);
+        
+        // Add click event
+        marker.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('=== Marker clicked ===');
+            console.log('buildingId:', buildingId);
+            console.log('buildingManagerMode.isActive:', buildingManagerMode.isActive);
+            
+            if (buildingManagerMode.isActive) {
+                selectMarker(buildingId, marker);
+            } else {
+                console.log('Building manager mode is not active');
+            }
+        });
+    });
+    
+    console.log('Marker click events initialized');
+}
+        // Select a marker and enable edit/delete buttons
+function selectMarker(buildingId, markerElement) {
+    console.log('=== selectMarker called ===');
+    console.log('buildingId:', buildingId);
+    console.log('markerElement:', markerElement);
+    
+    // Clear previous selection
+    clearMarkerSelection();
+    
+    // Set new selection
+    selectedMarkerInfo = {
+        id: buildingId,
+        element: markerElement
+    };
+    
+    console.log('selectedMarkerInfo set to:', selectedMarkerInfo);
+    
+    // Visual feedback for selected marker
+    markerElement.style.outline = '3px solid #ffd530';
+    markerElement.style.outlineOffset = '2px';
+    
+    // Enable edit and delete buttons
+    const editBtn = document.getElementById('editBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+    
+    console.log('editBtn:', editBtn);
+    console.log('deleteBtn:', deleteBtn);
+    
+    if (editBtn) {
+        editBtn.disabled = false;
+        console.log('Edit button enabled');
+    }
+    if (deleteBtn) {
+        deleteBtn.disabled = false;
+        console.log('Delete button enabled');
+    }
+    
+    // Update coordinates display
+    const coordsDisplay = document.getElementById('coordinatesDisplay');
+    if (coordsDisplay) {
+        coordsDisplay.textContent = `Selected: ${buildingId}`;
+    }
+    
+    // Update mode indicator
+    updateModeIndicator('ready', `Selected: ${buildingId} - Ready for Edit/Delete`);
+    
+    console.log('Marker selection completed for:', buildingId);
+}
+
+// Clear marker selection
+function clearMarkerSelection() {
+    if (selectedMarker && selectedMarker.element) {
+        // Remove selection visual feedback
+        selectedMarker.element.style.border = '';
+        selectedMarker.element.style.boxShadow = '';
+    }
+    
+    selectedMarker = null;
+    
+    // Disable edit and delete buttons
+    document.getElementById('editBtn').disabled = true;
+    document.getElementById('deleteBtn').disabled = true;
+    
+    // Reset coordinates display
+    const coordsDisplay = document.getElementById('coordinatesDisplay');
+    coordsDisplay.textContent = 'Selected: X: 0, Y: 0';
+    
+    // Reset mode indicator
+    updateModeIndicator('ready', 'Ready - Click on marker to select');
+}
+
+        function toggleBuildingManagerMode() {
+            buildingManagerMode.isActive = !buildingManagerMode.isActive;
+            const btn = document.getElementById('buildingManagerModeBtn');
+            const panel = document.getElementById('crudPanel');
+            
+            if (buildingManagerMode.isActive) {
+                btn.classList.add('active');
+                btn.textContent = 'Active Mode';
+                panel.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = 'BuildingManager';
+                panel.classList.remove('active');
+            }
+        }
+        
+// Enhanced closeBuildingManagerMode function
+function closeBuildingManagerMode() {
+    buildingManagerMode.isActive = false;
+    clearMarkerSelection(); // Clear any selection when closing
+    buildingManagerMode.crudState.mode = 'ready';
+    document.getElementById('buildingManagerModeBtn').classList.remove('active');
+    document.getElementById('buildingManagerModeBtn').textContent = 'BuildingManager';
+    document.getElementById('crudPanel').classList.remove('active');
+}
+        
+// Enhanced startCreateMode function (placeholder for future implementation)
+function startCreateMode() {
+    clearMarkerSelection(); // Clear any selection when starting create mode
+    buildingManagerMode.crudState.mode = 'create';
+    createModeCoordinates = null;
+    updateModeIndicator('create', 'CREATE MODE: Click on map to place new marker');
+    console.log('Create mode activated');
+}
+// Handle map click in create mode
+function handleCreateModeClick(x, y) {
+    createModeCoordinates = { x: x, y: y };
+    showCreateForm(x, y);
+    console.log('Create coordinates set:', createModeCoordinates);
+}
+// Show create form at selected coordinates
+function showCreateForm(x, y) {
+    // Get or create form
+    let createForm = document.getElementById('markerCreateForm');
+    
+    if (!createForm) {
+        createForm = createNewMarkerForm();
+        document.querySelector('.crud-panel-content').appendChild(createForm);
+    }
+    
+    // Generate next building ID
+    const nextId = generateNextBuildingId();
+    
+    // Populate form with default values
+    document.getElementById('newBuildingId').value = nextId;
+    document.getElementById('newBuildingName').value = nextId; // Default name same as ID
+    document.getElementById('newBuildingX').value = x;
+    document.getElementById('newBuildingY').value = y;
+    
+    // Show form
+    createForm.classList.add('active');
+    
+    // Update mode indicator
+    updateModeIndicator('create', `CREATE MODE: New marker at (${x}, ${y})`);
+    
+    console.log('Create form shown with coordinates:', x, y);
+}
+function createNewMarkerForm() {
+    const formDiv = document.createElement('div');
+    formDiv.id = 'markerCreateForm';
+    formDiv.className = 'marker-form';
+    
+    formDiv.innerHTML = `
+        <div class="form-group">
+            <label for="newBuildingId">Building ID:</label>
+            <input type="text" id="newBuildingId" placeholder="B00011" maxlength="10">
+        </div>
+        
+        <div class="form-group">
+            <label for="newBuildingName">Building Name:</label>
+            <input type="text" id="newBuildingName" placeholder="Building Name" maxlength="20">
+        </div>
+        
+        <div class="form-group">
+            <label for="newBuildingX">X Position:</label>
+            <input type="number" id="newBuildingX" placeholder="0" min="0" max="2000" readonly>
+        </div>
+        
+        <div class="form-group">
+            <label for="newBuildingY">Y Position:</label>
+            <input type="number" id="newBuildingY" placeholder="0" min="0" max="1000" readonly>
+        </div>
+        
+        <div class="form-buttons">
+            <button class="crud-btn create" onclick="saveNewMarker()">➕ Create Marker</button>
+            <button class="crud-btn" onclick="cancelCreate()" style="background: #666;">❌ Cancel</button>
+        </div>
+    `;
+    
+    return formDiv;
+}
+function saveNewMarker() {
+    // Get form values
+    const newId = document.getElementById('newBuildingId').value.trim();
+    const newName = document.getElementById('newBuildingName').value.trim();
+    const newX = parseInt(document.getElementById('newBuildingX').value);
+    const newY = parseInt(document.getElementById('newBuildingY').value);
+    
+    // Validate inputs
+    if (!newId || !newName || isNaN(newX) || isNaN(newY)) {
+        alert('Please fill in all fields with valid values!');
+        return;
+    }
+    
+    // Check if building ID already exists
+    if (checkIfBuildingExists(newId)) {
+        alert(`Building ID ${newId} already exists! Please use a different ID.`);
+        return;
+    }
+    
+    console.log('Creating new marker:', { newId, newName, newX, newY });
+    
+    // Create new marker element
+    createNewMarkerElement(newId, newName, newX, newY);
+    
+    // Hide form
+    hideCreateForm();
+    
+    // Update UI
+    updateModeIndicator('ready', `Building created: ${newId}`);
+    buildingManagerMode.crudState.mode = 'ready';
+    
+    console.log('New marker created successfully:', newId);
+}
+function checkIfBuildingExists(buildingId) {
+    const existingMarkers = document.querySelectorAll('.dynamic-building-info');
+    for (let marker of existingMarkers) {
+        if (marker.textContent.trim() === buildingId) {
+            return true;
+        }
+    }
+    return false;
+}
+function createNewMarkerElement(buildingId, buildingName, x, y) {
+    const markerDiv = document.createElement('div');
+    markerDiv.className = 'dynamic-building-marker';
+    markerDiv.style.left = x + 'px';
+    markerDiv.style.top = y + 'px';
+    
+    markerDiv.innerHTML = `
+        <a class="dynamic-building-link" href="#" onclick="return false;"></a>
+        <div class="dynamic-building-info">${buildingId}</div>
+    `;
+    
+    // Add to map
+    const mapElement = document.getElementById('map');
+    mapElement.appendChild(markerDiv);
+    
+    // Add click event to new marker
+    addClickEventToMarker(markerDiv, buildingId);
+    
+    // Add creation animation
+    markerDiv.style.opacity = '0';
+    markerDiv.style.transform = 'scale(0)';
+    markerDiv.style.transition = 'all 0.3s ease';
+    
+    setTimeout(() => {
+        markerDiv.style.opacity = '';
+        markerDiv.style.transform = '';
+    }, 50);
+    
+    console.log('New marker DOM element created:', buildingId);
+}
+function addClickEventToMarker(markerElement, buildingId) {
+    markerElement.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log('New marker clicked:', buildingId);
+        
+        if (buildingManagerMode.isActive) {
+            selectMarker(buildingId, markerElement);
+        }
+    });
+}
+function cancelCreate() {
+    hideCreateForm();
+    createModeCoordinates = null;
+    buildingManagerMode.crudState.mode = 'ready';
+    updateModeIndicator('ready', 'Create cancelled');
+    console.log('Create cancelled by user');
+}
+function hideCreateForm() {
+    const createForm = document.getElementById('markerCreateForm');
+    if (createForm) {
+        createForm.classList.remove('active');
+    }
+}
+// Generate next building ID
+function generateNextBuildingId() {
+    const buildingId = `B${String(nextBuildingNumber).padStart(5, '0')}`;
+    nextBuildingNumber++;
+    return buildingId;
+}
+        
+// Enhanced startEditMode function (placeholder for future implementation)
+function startEditMode() {
+    console.log('Edit button clicked');
+    console.log('selectedMarkerInfo:', selectedMarkerInfo);
+    console.log('selectedMarkerInfo type:', typeof selectedMarkerInfo);
+    
+    if (!selectedMarkerInfo) {
+        console.log('No marker selected - selectedMarkerInfo is null/undefined');
+        alert('Please select a marker first!');
+        return;
+    }
+    
+    console.log('Marker is selected:', selectedMarkerInfo.id);
+    buildingManagerMode.crudState.mode = 'edit';
+    showEditForm();
+    updateModeIndicator('edit', `EDIT MODE: Editing ${selectedMarkerInfo.id}`);
+}
+        
+// Show edit form with current marker data
+function showEditForm() {
+    // Get or create edit form
+    let editForm = document.getElementById('markerEditForm');
+    
+    if (!editForm) {
+        editForm = createEditForm();
+        document.querySelector('.crud-panel-content').appendChild(editForm);
+    }
+    
+    // Get current marker position from style
+    const markerElement = selectedMarkerInfo.element;
+    const currentX = parseInt(markerElement.style.left) || 0;
+    const currentY = parseInt(markerElement.style.top) || 0;
+    
+    // Populate form with current data
+    document.getElementById('editBuildingId').value = selectedMarkerInfo.id;
+    document.getElementById('editBuildingName').value = selectedMarkerInfo.id; // Default name same as ID
+    document.getElementById('editBuildingX').value = currentX;
+    document.getElementById('editBuildingY').value = currentY;
+    
+    // Show form
+    editForm.classList.add('active');
+    
+    console.log('Edit form shown for:', selectedMarkerInfo.id);
+}
+
+// Create edit form HTML structure
+function createEditForm() {
+    const formDiv = document.createElement('div');
+    formDiv.id = 'markerEditForm';
+    formDiv.className = 'marker-form';
+    
+    formDiv.innerHTML = `
+        <div class="form-group">
+            <label for="editBuildingId">Building ID:</label>
+            <input type="text" id="editBuildingId" placeholder="B00001" maxlength="10">
+        </div>
+        
+        <div class="form-group">
+            <label for="editBuildingName">Building Name:</label>
+            <input type="text" id="editBuildingName" placeholder="Building Name" maxlength="20">
+        </div>
+        
+        <div class="form-group">
+            <label for="editBuildingX">X Position:</label>
+            <input type="number" id="editBuildingX" placeholder="0" min="0" max="2000">
+        </div>
+        
+        <div class="form-group">
+            <label for="editBuildingY">Y Position:</label>
+            <input type="number" id="editBuildingY" placeholder="0" min="0" max="1000">
+        </div>
+        
+        <div class="form-buttons">
+            <button class="crud-btn save" onclick="saveEditChanges()">💾 Save Changes</button>
+            <button class="crud-btn" onclick="cancelEdit()" style="background: #666;">❌ Cancel</button>
+        </div>
+    `;
+    
+    return formDiv;
+}
+
+// Save edit changes
+function saveEditChanges() {
+    if (!selectedMarkerInfo) {
+        alert('No marker selected!');
+        return;
+    }
+    
+    // Get form values
+    const newId = document.getElementById('editBuildingId').value.trim();
+    const newName = document.getElementById('editBuildingName').value.trim();
+    const newX = parseInt(document.getElementById('editBuildingX').value);
+    const newY = parseInt(document.getElementById('editBuildingY').value);
+    
+    // Validate inputs
+    if (!newId || !newName || isNaN(newX) || isNaN(newY)) {
+        alert('Please fill in all fields with valid values!');
+        return;
+    }
+    
+    console.log('Saving changes:', { newId, newName, newX, newY });
+    
+    // Update marker element
+    updateMarkerElement(newId, newName, newX, newY);
+    
+    // Update selection info
+    selectedMarkerInfo.id = newId;
+    
+    // Hide form
+    hideEditForm();
+    
+    // Update UI
+    updateModeIndicator('ready', `Building updated: ${newId}`);
+    clearMarkerSelection();
+    
+    console.log('Edit completed successfully');
+}
+
+// Update marker element with new data
+function updateMarkerElement(newId, newName, newX, newY) {
+    const markerElement = selectedMarkerInfo.element;
+    
+    // Update position
+    markerElement.style.left = newX + 'px';
+    markerElement.style.top = newY + 'px';
+    
+    // Update building info text
+    const infoDiv = markerElement.querySelector('.dynamic-building-info');
+    if (infoDiv) {
+        infoDiv.textContent = newId;
+    }
+    
+    // Add visual feedback for successful update
+    markerElement.style.transition = 'all 0.3s ease';
+    markerElement.style.transform = 'scale(1.2)';
+    markerElement.style.filter = 'brightness(1.3)';
+    
+    setTimeout(() => {
+        markerElement.style.transform = '';
+        markerElement.style.filter = '';
+    }, 500);
+    
+    console.log('Marker element updated:', { newId, newX, newY });
+}
+
+// Cancel edit operation
+function cancelEdit() {
+    hideEditForm();
+    updateModeIndicator('ready', 'Edit cancelled');
+    console.log('Edit cancelled by user');
+}
+
+// Hide edit form
+function hideEditForm() {
+    const editForm = document.getElementById('markerEditForm');
+    if (editForm) {
+        editForm.classList.remove('active');
+    }
+    buildingManagerMode.crudState.mode = 'ready';
+}
+
+// Enhanced enhancedBrowserPoint function to support position editing
+function enhancedBrowserPoint(e) {
+    const x = Math.round(e.clientX);
+    const y = Math.round(e.clientY - 105);
+    
+    const markerX = x - 5;
+    const markerY = y + 2;
+    
+    const displayElement = document.getElementById('position-display');
+    if (displayElement) {
+        displayElement.textContent = `POSITION : ( X : ${markerX}, Y : ${markerY})`;
+    }
+    
+    // Handle create mode click
+    if (buildingManagerMode.isActive && 
+        buildingManagerMode.crudState.mode === 'create') {
+        handleCreateModeClick(markerX, markerY);
+        return;
+    }
+    
+    // If in edit mode and form is open, update position fields
+    if (buildingManagerMode.isActive && 
+        buildingManagerMode.crudState.mode === 'edit' && 
+        document.getElementById('markerEditForm') && 
+        document.getElementById('markerEditForm').classList.contains('active')) {
+        
+        document.getElementById('editBuildingX').value = markerX;
+        document.getElementById('editBuildingY').value = markerY;
+        
+        const coordsDisplay = document.getElementById('coordinatesDisplay');
+        if (coordsDisplay) {
+            coordsDisplay.textContent = `Selected: X: ${markerX}, Y: ${markerY}`;
+        }
+        
+        console.log('Position updated in edit form:', markerX, markerY);
+        return;
+    }
+    
+    // Normal map click behavior - clear selection if not in create mode
+    if (buildingManagerMode.isActive && 
+        buildingManagerMode.crudState.mode !== 'create') {
+        clearMarkerSelection();
+    }
+    
+    const coordsDisplay = document.getElementById('coordinatesDisplay');
+    if (coordsDisplay) {
+        coordsDisplay.textContent = `Selected: X: ${markerX}, Y: ${markerY}`;
+    }
+    
+    buildingManagerMode.crudState.selectedCoordinates = { x: markerX, y: markerY };
+}
+
+// CSS styles for edit form (add this to your stylesheet)
+const editFormStyles = `
+.marker-form {
+    display: none;
+    background: #333;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    border: 1px solid #444;
+}
+
+.marker-form.active {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-group {
+    margin-bottom: 8px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 3px;
+    font-weight: 500;
+    color: #ccc;
+    font-size: 11px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #555;
+    border-radius: 3px;
+    background: #2a2a2a;
+    color: #e0e0e0;
+    font-size: 11px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #ffd530;
+    background: #333;
+}
+
+.form-group input::placeholder {
+    color: #888;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.form-buttons .crud-btn {
+    flex: 1;
+}
+`;
+
+// Add styles to document
+function addEditFormStyles() {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = editFormStyles;
+    document.head.appendChild(styleElement);
+}
+
+
+// Enhanced startDeleteMode function (triggered by delete button)
+function startDeleteMode() {
+    if (!selectedMarker) {
+        alert('Please select a marker first!');
+        return;
+    }
+    
+    const buildingId = selectedMarker.id;
+    
+    if (confirm(`Are you sure you want to delete building ${buildingId}?`)) {
+        deleteSelectedMarker();
+    }
+}
+
+// Delete the currently selected marker
+function deleteSelectedMarker() {
+    if (!selectedMarker) {
+        alert('No marker selected for deletion!');
+        return;
+    }
+    
+    const buildingId = selectedMarker.id;
+    const markerElement = selectedMarker.element;
+    
+    // Remove from data array
+    deleteMarkerFromData(buildingId);
+    
+    // Remove from DOM with animation
+    deleteMarkerFromDOM(markerElement);
+    
+    // Clear selection
+    clearMarkerSelection();
+    
+    // Update UI
+    updateModeIndicator('ready', `Building ${buildingId} deleted successfully`);
+    
+    console.log(`Building ${buildingId} deleted successfully`);
+}
+
+// Remove marker from building data array
+function deleteMarkerFromData(buildingId) {
+    const index = buildingMarkers.findIndex(marker => marker.id === buildingId);
+    if (index !== -1) {
+        buildingMarkers.splice(index, 1);
+        console.log(`Removed ${buildingId} from data array`);
+    }
+}
+
+// Remove marker element from DOM with animation
+function deleteMarkerFromDOM(markerElement) {
+    if (markerElement && markerElement.parentNode) {
+        markerElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        markerElement.style.opacity = '0';
+        markerElement.style.transform = 'scale(0)';
+        
+        setTimeout(() => {
+            markerElement.remove();
+        }, 300);
+    }
+}
+
+// Enhanced saveData function
+function saveData() {
+    console.log('Current building data:', buildingMarkers);
+    alert(`Data saved! Current buildings: ${buildingMarkers.length}`);
+    buildingManagerMode.crudState.isModified = false;
+}
+        
+        function updateModeIndicator(mode, message) {
+            const indicator = document.getElementById('modeIndicator');
+            indicator.className = `mode-indicator ${mode}`;
+            indicator.textContent = message;
+        }
+        // Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMarkerClickEvents();
+    addEditFormStyles();
+});
+    </script>
+</body>
+</html>
